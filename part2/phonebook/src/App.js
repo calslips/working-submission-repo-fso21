@@ -11,19 +11,19 @@ const PersonForm = ({
   addPerson,
   handleNameChange,
   handleNumberChange,
-  newName,
+  name,
   number,
 }) => (
   <form onSubmit={addPerson}>
-    <FormName newName={newName} handleNameChange={handleNameChange} />
+    <FormName name={name} handleNameChange={handleNameChange} />
     <FormNumber number={number} handleNumberChange={handleNumberChange} />
     <FormButton />
   </form>
 );
 
-const FormName = ({ newName, handleNameChange }) => (
+const FormName = ({ name, handleNameChange }) => (
   <div>
-    name: <input value={newName} onChange={handleNameChange} />
+    name: <input value={name} onChange={handleNameChange} />
   </div>
 );
 
@@ -51,7 +51,7 @@ const Person = ({ person }) => (
 
 const App = () => {
   const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState("");
+  const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -64,7 +64,7 @@ const App = () => {
 
   const handleNameChange = (event) => {
     console.log(event.target.value);
-    setNewName(event.target.value);
+    setName(event.target.value);
   };
 
   const handleNumberChange = (event) => {
@@ -83,34 +83,39 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault();
-    if (!newName) {
+    if (!name) {
       emptyName();
     } else if (!number) {
       emptyNumber();
     } else {
       const personObject = {
-        name: newName,
+        name: name,
         number: number,
       };
-      checkName(newName)
-        ? sameName(newName)
-        : setPersons(persons.concat(personObject));
-      setNewName("");
-      setNumber("");
+      sameName(name)
+        ? duplicateAlert(name)
+        : axios
+            .post("http://localhost:3001/persons", personObject)
+            .then((response) => {
+              console.log(response);
+              setPersons(persons.concat(response.data));
+              setName("");
+              setNumber("");
+            });
     }
   };
 
-  const checkName = (newName) => {
+  const sameName = (nameInput) => {
     let same = false;
     persons.forEach((person) => {
-      if (newName.toUpperCase() === person.name.toUpperCase()) {
+      if (nameInput.toUpperCase() === person.name.toUpperCase()) {
         same = true;
       }
     });
     return same;
   };
 
-  const sameName = (name) => alert(`${name} is already added to phonebook`);
+  const duplicateAlert = (name) => alert(`${name} is already added to phonebook`);
   const emptyName = () => alert("Please enter a name");
   const emptyNumber = () => alert("Please enter a number");
 
@@ -123,7 +128,7 @@ const App = () => {
         addPerson={addPerson}
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
-        newName={newName}
+        name={name}
         number={number}
       />
       <h3>Numbers</h3>
