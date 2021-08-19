@@ -46,7 +46,7 @@ const Match = ({ name, capital, population, languages, flag, weather }) => (
     <Population population={population} />
     <Languages languages={languages} />
     <Flag flag={flag} name={name} />
-    <Weather capital={capital} weather={weather} />
+    {weather ? <Weather capital={capital} weather={weather} /> : <></> }
   </div>
 );
 
@@ -114,7 +114,7 @@ const App = () => {
   const [countries, setCountries] = useState([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
-  const [weather, setWeather] = useState({});
+  const [weather, setWeather] = useState();
 
   useEffect(() => {
     axios
