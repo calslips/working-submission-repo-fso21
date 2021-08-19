@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import phonebookServices from "./services/backend.js";
 
 const Filter = ({ search, handleFilter }) => (
   <div>
@@ -57,9 +58,12 @@ const App = () => {
   const [searchResult, setSearchResult] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data));
+    // axios
+    //   .get("http://localhost:3001/persons")
+    //   .then((response) => setPersons(response.data));
+    phonebookServices
+      .getAll()
+      .then((initialPersons) => setPersons(initialPersons));
   }, []);
 
   const handleNameChange = (event) => {
@@ -94,14 +98,21 @@ const App = () => {
       };
       sameName(name)
         ? duplicateAlert(name)
-        : axios
-            .post("http://localhost:3001/persons", personObject)
-            .then((response) => {
-              console.log(response);
-              setPersons(persons.concat(response.data));
+        // : axios
+        //     .post("http://localhost:3001/persons", personObject)
+        //     .then((response) => {
+        //       console.log(response);
+        //       setPersons(persons.concat(response.data));
+        //       setName("");
+        //       setNumber("");
+        //     });
+        : phonebookServices
+            .create(personObject)
+            .then((createdPerson) => {
+              setPersons(persons.concat(createdPerson));
               setName("");
               setNumber("");
-            });
+            })
     }
   };
 
