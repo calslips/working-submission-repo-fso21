@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import axios from "axios";
 import phonebookServices from "./services/backend.js";
 
 const Filter = ({ search, handleFilter }) => (
@@ -40,14 +39,27 @@ const FormButton = () => (
   </div>
 );
 
-const List = ({ persons }) => {
-  return persons.map((person) => <Person key={person.name} person={person} />);
+const List = ({ persons, handleDelete }) => {
+  return persons.map((person) => (
+    <Person key={person.name} person={person} handleDelete={handleDelete} />
+  ));
 };
 
-const Person = ({ person }) => (
+const Person = ({ person, handleDelete }) => (
   <p>
     {person.name} {person.number}
+    <DeleteButton
+      id={person.id}
+      name={person.name}
+      handleDelete={handleDelete}
+    />
   </p>
+);
+
+const DeleteButton = ({ id, name, handleDelete }) => (
+  <button id={id} value={name} onClick={handleDelete}>
+    delete
+  </button>
 );
 
 const App = () => {
@@ -58,9 +70,6 @@ const App = () => {
   const [searchResult, setSearchResult] = useState([]);
 
   useEffect(() => {
-    // axios
-    //   .get("http://localhost:3001/persons")
-    //   .then((response) => setPersons(response.data));
     phonebookServices
       .getAll()
       .then((initialPersons) => setPersons(initialPersons));
@@ -98,21 +107,11 @@ const App = () => {
       };
       sameName(name)
         ? duplicateAlert(name)
-        // : axios
-        //     .post("http://localhost:3001/persons", personObject)
-        //     .then((response) => {
-        //       console.log(response);
-        //       setPersons(persons.concat(response.data));
-        //       setName("");
-        //       setNumber("");
-        //     });
-        : phonebookServices
-            .create(personObject)
-            .then((createdPerson) => {
-              setPersons(persons.concat(createdPerson));
-              setName("");
-              setNumber("");
-            })
+        : phonebookServices.create(personObject).then((createdPerson) => {
+            setPersons(persons.concat(createdPerson));
+            setName("");
+            setNumber("");
+          });
     }
   };
 
@@ -126,9 +125,20 @@ const App = () => {
     return same;
   };
 
-  const duplicateAlert = (name) => alert(`${name} is already added to phonebook`);
+  const duplicateAlert = (name) =>
+    alert(`${name} is already added to phonebook`);
   const emptyName = () => alert("Please enter a name");
   const emptyNumber = () => alert("Please enter a number");
+
+  const handleDelete = (event) => {
+    let deletion = window.confirm(`Delete ${event.target.value} ?`);
+    if (deletion) {
+      phonebookServices.remove(event.target.id);
+      setPersons(
+        persons.filter((person) => person.id !== parseInt(event.target.id))
+      );
+    }
+  };
 
   return (
     <div>
@@ -143,7 +153,11 @@ const App = () => {
         number={number}
       />
       <h3>Numbers</h3>
-      {search ? <List persons={searchResult} /> : <List persons={persons} />}
+      {search ? (
+        <List persons={searchResult} handleDelete={handleDelete} />
+      ) : (
+        <List persons={persons} handleDelete={handleDelete} />
+      )}
     </div>
   );
 };
