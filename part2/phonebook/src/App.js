@@ -62,12 +62,25 @@ const DeleteButton = ({ id, name, handleDelete }) => (
   </button>
 );
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return (
+    <div className="feedback">
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
+  const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
     phonebookServices
@@ -110,6 +123,15 @@ const App = () => {
         : phonebookServices.create(personObject).then((createdPerson) => {
             setPersons(persons.concat(createdPerson));
             clearNameAndNumber();
+            return createdPerson;
+          })
+          .then((person) => {
+            setFeedback(
+              `Added ${person.name}`
+            )
+            setTimeout(() => {
+              setFeedback(null)
+            }, 5000)
           });
     }
   };
@@ -139,31 +161,46 @@ const App = () => {
       `${duplicatePerson.name} is already added to phonebook, replace the old number with a new one?`
     );
     if (replace) {
-      updateNumber(duplicatePerson)
+      updateNumber(duplicatePerson);
     }
     clearNameAndNumber();
   };
 
   const updateNumber = (updatePerson) => {
-    let personToUpdate = persons.find((p) => p.name.toUpperCase() === updatePerson.name.toUpperCase());
+    let personToUpdate = persons.find(
+      (p) => p.name.toUpperCase() === updatePerson.name.toUpperCase()
+    );
     let changedPerson = { ...personToUpdate, number: updatePerson.number };
 
-    phonebookServices.update(changedPerson.id, changedPerson)
+    phonebookServices
+      .update(changedPerson.id, changedPerson)
       .then((returnedPerson) => {
-        setPersons(persons.map((p) => p.id === returnedPerson.id ? returnedPerson : p))
+        setPersons(
+          persons.map((p) => (p.id === returnedPerson.id ? returnedPerson : p))
+        );
+        return returnedPerson;
       })
-  }
+      .then((person) => {
+        setFeedback(
+          `Changed number for ${person.name}`
+        )
+        setTimeout(() => {
+          setFeedback(null);
+        }, 5000)
+      });
+  };
 
   const emptyName = () => alert("Please enter a name");
   const emptyNumber = () => alert("Please enter a number");
   const clearNameAndNumber = () => {
     setName("");
     setNumber("");
-  }
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={feedback} />
       <Filter search={search} handleFilter={handleFilter} />
       <h3>Add a new</h3>
       <PersonForm
