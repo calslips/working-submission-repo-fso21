@@ -1,7 +1,7 @@
 import React from "react";
 
-const Notification = ({ message, error }) => {
-  if (message === null) {
+const Notification = ({feedback}) => {
+  if (feedback === null) {
     return null;
   }
 
@@ -26,9 +26,9 @@ const Notification = ({ message, error }) => {
     marginBottom: 10,
   };
 
-  error ? (messageStyle = errorStyle) : (messageStyle = successStyle);
+  feedback.error ? (messageStyle = errorStyle) : (messageStyle = successStyle);
 
-  return <div style={messageStyle}>{message}</div>;
+  return <div style={messageStyle}>{feedback.message}</div>;
 };
 
 export default Notification;

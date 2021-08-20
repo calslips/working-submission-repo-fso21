@@ -12,7 +12,6 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [feedback, setFeedback] = useState(null);
-  const [requestError, setRequestError] = useState(false);
 
   useEffect(() => {
     phonebookServices
@@ -20,11 +19,10 @@ const App = () => {
       .then((initialPersons) => setPersons(initialPersons));
   }, []);
 
-  const feedbackContent = (message) => {
-    setFeedback(message);
+  const feedbackContent = ( message, error=false ) => {
+    setFeedback({ message, error });
     setTimeout(() => {
       setFeedback(null)
-      setRequestError(false);
     }, 5000)
   };
 
@@ -68,12 +66,10 @@ const App = () => {
               return createdPerson;
             })
             .then((person) => {
-              setRequestError(false)
               feedbackContent(`Added ${person.name}`);
             })
             .catch((error) => {
-              setRequestError(true)
-              feedbackContent(`Error, did not add ${personObject.name}`)
+              feedbackContent(`Error: did not add ${personObject.name}`, true)
             })
     }
   };
@@ -91,15 +87,13 @@ const App = () => {
         return personToDelete;
       })
       .then((deletedPerson) => {
-        setRequestError(false)
         feedbackContent(`Deleted ${deletedPerson}`)
       })
       .catch((error) => {
-        setRequestError(true)
         setPersons(
           persons.filter((person) => person.name !== event.target.value)
         )
-        feedbackContent(`Information for ${event.target.value} had already been deleted`)
+        feedbackContent(`Error: information for ${event.target.value} had already been deleted`, true)
       });
     }
   };
@@ -139,15 +133,13 @@ const App = () => {
         return returnedPerson;
       })
       .then((person) => {
-        setRequestError(false)
         feedbackContent(`Changed number for ${person.name}`);
       })
       .catch((error) => {
-        setRequestError(true);
         setPersons(
           persons.filter((p) => (p.name !== changedPerson.name))
         );
-        feedbackContent(`Information for ${name} has already been removed from server`);
+        feedbackContent(`Error: information for ${name} has already been removed from server`, true);
       });
   };
 
@@ -161,7 +153,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={feedback} error={requestError} />
+      <Notification feedback={feedback} />
       <Filter search={search} handleFilter={handleFilter} />
       <h3>Add a new</h3>
       <Form
