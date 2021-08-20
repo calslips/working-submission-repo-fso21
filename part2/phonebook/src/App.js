@@ -1,101 +1,9 @@
 import React, { useState, useEffect } from "react";
 import phonebookServices from "./services/backend.js";
-
-const Filter = ({ search, handleFilter }) => (
-  <div>
-    filter shown with <input value={search} onChange={handleFilter} />
-  </div>
-);
-
-const PersonForm = ({
-  addPerson,
-  handleNameChange,
-  handleNumberChange,
-  name,
-  number,
-}) => (
-  <form onSubmit={addPerson}>
-    <FormName name={name} handleNameChange={handleNameChange} />
-    <FormNumber number={number} handleNumberChange={handleNumberChange} />
-    <FormButton />
-  </form>
-);
-
-const FormName = ({ name, handleNameChange }) => (
-  <div>
-    name: <input value={name} onChange={handleNameChange} />
-  </div>
-);
-
-const FormNumber = ({ number, handleNumberChange }) => (
-  <div>
-    number: <input value={number} onChange={handleNumberChange} />
-  </div>
-);
-
-const FormButton = () => (
-  <div>
-    <button type="submit">add</button>
-  </div>
-);
-
-const List = ({ persons, handleDelete }) => {
-  return persons.map((person) => (
-    <Person key={person.name} person={person} handleDelete={handleDelete} />
-  ));
-};
-
-const Person = ({ person, handleDelete }) => (
-  <p>
-    {person.name} {person.number}
-    <DeleteButton
-      id={person.id}
-      name={person.name}
-      handleDelete={handleDelete}
-    />
-  </p>
-);
-
-const DeleteButton = ({ id, name, handleDelete }) => (
-  <button id={id} value={name} onClick={handleDelete}>
-    delete
-  </button>
-);
-
-const Notification = ({ message, error }) => {
-  if (message === null) {
-    return null;
-  }
-
-  let messageStyle;
-
-  const successStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10
-  }
-  const errorStyle = {
-    color: 'red',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10
-  }
-
-  error ? messageStyle = errorStyle : messageStyle = successStyle;
-
-  return (
-    <div style={messageStyle}>
-      {message}
-    </div>
-  )
-}
+import Filter from "./components/Filter";
+import Form from "./components/Form";
+import List from "./components/List";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -144,19 +52,19 @@ const App = () => {
       };
       sameName(name)
         ? duplicateAlert(personObject)
-        : phonebookServices.create(personObject).then((createdPerson) => {
-            setPersons(persons.concat(createdPerson));
-            clearNameAndNumber();
-            return createdPerson;
-          })
-          .then((person) => {
-            setFeedback(
-              `Added ${person.name}`
-            )
-            setTimeout(() => {
-              setFeedback(null)
-            }, 5000)
-          });
+        : phonebookServices
+            .create(personObject)
+            .then((createdPerson) => {
+              setPersons(persons.concat(createdPerson));
+              clearNameAndNumber();
+              return createdPerson;
+            })
+            .then((person) => {
+              setFeedback(`Added ${person.name}`);
+              setTimeout(() => {
+                setFeedback(null);
+              }, 5000);
+            });
     }
   };
 
@@ -205,22 +113,20 @@ const App = () => {
         return returnedPerson;
       })
       .then((person) => {
-        setFeedback(
-          `Changed number for ${person.name}`
-        )
+        setFeedback(`Changed number for ${person.name}`);
         setTimeout(() => {
           setFeedback(null);
-        }, 5000)
+        }, 5000);
       })
       .catch((error) => {
-        setRequestError(true)
+        setRequestError(true);
         setFeedback(
           `Information for ${name} has already been removed from server`
-        )
+        );
         setTimeout(() => {
           setFeedback(null);
           setRequestError(false);
-        }, 5000)
+        }, 5000);
       });
   };
 
@@ -237,7 +143,7 @@ const App = () => {
       <Notification message={feedback} error={requestError} />
       <Filter search={search} handleFilter={handleFilter} />
       <h3>Add a new</h3>
-      <PersonForm
+      <Form
         addPerson={addPerson}
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
