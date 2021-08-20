@@ -106,12 +106,21 @@ const App = () => {
         number: number,
       };
       sameName(name)
-        ? duplicateAlert(name)
+        ? duplicateAlert(personObject)
         : phonebookServices.create(personObject).then((createdPerson) => {
             setPersons(persons.concat(createdPerson));
-            setName("");
-            setNumber("");
+            clearNameAndNumber();
           });
+    }
+  };
+
+  const handleDelete = (event) => {
+    let deletion = window.confirm(`Delete ${event.target.value} ?`);
+    if (deletion) {
+      phonebookServices.remove(event.target.id);
+      setPersons(
+        persons.filter((person) => person.name !== event.target.value)
+      );
     }
   };
 
@@ -125,20 +134,32 @@ const App = () => {
     return same;
   };
 
-  const duplicateAlert = (name) =>
-    alert(`${name} is already added to phonebook`);
+  const duplicateAlert = (duplicatePerson) => {
+    let replace = window.confirm(
+      `${duplicatePerson.name} is already added to phonebook, replace the old number with a new one?`
+    );
+    if (replace) {
+      updateNumber(duplicatePerson)
+    }
+    clearNameAndNumber();
+  };
+
+  const updateNumber = (updatePerson) => {
+    let personToUpdate = persons.find((p) => p.name.toUpperCase() === updatePerson.name.toUpperCase());
+    let changedPerson = { ...personToUpdate, number: updatePerson.number };
+
+    phonebookServices.update(changedPerson.id, changedPerson)
+      .then((returnedPerson) => {
+        setPersons(persons.map((p) => p.id === returnedPerson.id ? returnedPerson : p))
+      })
+  }
+
   const emptyName = () => alert("Please enter a name");
   const emptyNumber = () => alert("Please enter a number");
-
-  const handleDelete = (event) => {
-    let deletion = window.confirm(`Delete ${event.target.value} ?`);
-    if (deletion) {
-      phonebookServices.remove(event.target.id);
-      setPersons(
-        persons.filter((person) => person.id !== parseInt(event.target.id))
-      );
-    }
-  };
+  const clearNameAndNumber = () => {
+    setName("");
+    setNumber("");
+  }
 
   return (
     <div>
