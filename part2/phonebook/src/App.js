@@ -62,13 +62,36 @@ const DeleteButton = ({ id, name, handleDelete }) => (
   </button>
 );
 
-const Notification = ({ message }) => {
+const Notification = ({ message, error }) => {
   if (message === null) {
     return null;
   }
 
+  let messageStyle;
+
+  const successStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+  const errorStyle = {
+    color: 'red',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+
+  error ? messageStyle = errorStyle : messageStyle = successStyle;
+
   return (
-    <div className="feedback">
+    <div style={messageStyle}>
       {message}
     </div>
   )
@@ -81,6 +104,7 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [feedback, setFeedback] = useState(null);
+  const [requestError, setRequestError] = useState(false);
 
   useEffect(() => {
     phonebookServices
@@ -187,6 +211,16 @@ const App = () => {
         setTimeout(() => {
           setFeedback(null);
         }, 5000)
+      })
+      .catch((error) => {
+        setRequestError(true)
+        setFeedback(
+          `Information for ${name} has already been removed from server`
+        )
+        setTimeout(() => {
+          setFeedback(null);
+          setRequestError(false);
+        }, 5000)
       });
   };
 
@@ -200,7 +234,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={feedback} />
+      <Notification message={feedback} error={requestError} />
       <Filter search={search} handleFilter={handleFilter} />
       <h3>Add a new</h3>
       <PersonForm
