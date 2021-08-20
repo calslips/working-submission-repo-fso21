@@ -20,6 +20,14 @@ const App = () => {
       .then((initialPersons) => setPersons(initialPersons));
   }, []);
 
+  const feedbackContent = (message) => {
+    setFeedback(message);
+    setTimeout(() => {
+      setFeedback(null)
+      setRequestError(false);
+    }, 5000)
+  };
+
   const handleNameChange = (event) => {
     console.log(event.target.value);
     setName(event.target.value);
@@ -60,21 +68,39 @@ const App = () => {
               return createdPerson;
             })
             .then((person) => {
-              setFeedback(`Added ${person.name}`);
-              setTimeout(() => {
-                setFeedback(null);
-              }, 5000);
-            });
+              setRequestError(false)
+              feedbackContent(`Added ${person.name}`);
+            })
+            .catch((error) => {
+              setRequestError(true)
+              feedbackContent(`Error, did not add ${personObject.name}`)
+            })
     }
   };
 
   const handleDelete = (event) => {
-    let deletion = window.confirm(`Delete ${event.target.value} ?`);
+    let personToDelete = event.target.value;
+    let deletion = window.confirm(`Delete ${personToDelete} ?`);
+
     if (deletion) {
-      phonebookServices.remove(event.target.id);
-      setPersons(
-        persons.filter((person) => person.name !== event.target.value)
-      );
+      phonebookServices.remove(event.target.id)
+      .then(() => {
+        setPersons(
+          persons.filter((person) => person.name !== personToDelete)
+        )
+        return personToDelete;
+      })
+      .then((deletedPerson) => {
+        setRequestError(false)
+        feedbackContent(`Deleted ${deletedPerson}`)
+      })
+      .catch((error) => {
+        setRequestError(true)
+        setPersons(
+          persons.filter((person) => person.name !== event.target.value)
+        )
+        feedbackContent(`Information for ${event.target.value} had already been deleted`)
+      });
     }
   };
 
@@ -113,20 +139,15 @@ const App = () => {
         return returnedPerson;
       })
       .then((person) => {
-        setFeedback(`Changed number for ${person.name}`);
-        setTimeout(() => {
-          setFeedback(null);
-        }, 5000);
+        setRequestError(false)
+        feedbackContent(`Changed number for ${person.name}`);
       })
       .catch((error) => {
         setRequestError(true);
-        setFeedback(
-          `Information for ${name} has already been removed from server`
+        setPersons(
+          persons.filter((p) => (p.name !== changedPerson.name))
         );
-        setTimeout(() => {
-          setFeedback(null);
-          setRequestError(false);
-        }, 5000);
+        feedbackContent(`Information for ${name} has already been removed from server`);
       });
   };
 
