@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import phonebookServices from "./services/backend.js";
+import phonebookServices from "./services/persons.js";
 import Filter from "./components/Filter";
 import Form from "./components/Form";
 import List from "./components/List";
