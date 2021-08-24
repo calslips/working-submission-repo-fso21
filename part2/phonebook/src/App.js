@@ -60,13 +60,11 @@ const App = () => {
         ? duplicateAlert(personObject)
         : phonebookServices
             .create(personObject)
-            .then((createdPerson) => {
-              setPersons(persons.concat(createdPerson));
+            .then((newPersons) => {
+              console.log('returned response data from create', newPersons);
+              setPersons(newPersons);
+              feedbackContent(`Added ${personObject.name}`);
               clearNameAndNumber();
-              return createdPerson;
-            })
-            .then((person) => {
-              feedbackContent(`Added ${person.name}`);
             })
             .catch((error) => {
               feedbackContent(`Error: did not add ${personObject.name}`, true)
@@ -84,10 +82,7 @@ const App = () => {
         setPersons(
           persons.filter((person) => person.name !== personToDelete)
         )
-        return personToDelete;
-      })
-      .then((deletedPerson) => {
-        feedbackContent(`Deleted ${deletedPerson}`)
+        feedbackContent(`Deleted ${personToDelete}`)
       })
       .catch((error) => {
         setPersons(
@@ -130,10 +125,7 @@ const App = () => {
         setPersons(
           persons.map((p) => (p.id === returnedPerson.id ? returnedPerson : p))
         );
-        return returnedPerson;
-      })
-      .then((person) => {
-        feedbackContent(`Changed number for ${person.name}`);
+        feedbackContent(`Changed number for ${changedPerson.name}`);
       })
       .catch((error) => {
         setPersons(
