@@ -60,10 +60,9 @@ const App = () => {
         ? duplicateAlert(personObject)
         : phonebookServices
             .create(personObject)
-            .then((newPersons) => {
-              console.log('returned response data from create', newPersons);
-              setPersons(newPersons);
-              feedbackContent(`Added ${personObject.name}`);
+            .then((returnedPerson) => {
+              setPersons(persons.concat(returnedPerson));
+              feedbackContent(`Added ${returnedPerson.name}`);
               clearNameAndNumber();
             })
             .catch((error) => {
