@@ -66,7 +66,7 @@ const App = () => {
               clearNameAndNumber();
             })
             .catch((error) => {
-              feedbackContent(`Error: did not add ${personObject.name}`, true)
+              feedbackContent(`${error.response.data.error}`, true)
             })
     }
   };
@@ -109,7 +109,6 @@ const App = () => {
     if (replace) {
       updateNumber(duplicatePerson);
     }
-    clearNameAndNumber();
   };
 
   const updateNumber = (updatePerson) => {
@@ -125,12 +124,10 @@ const App = () => {
           persons.map((p) => (p.id === returnedPerson.id ? returnedPerson : p))
         );
         feedbackContent(`Changed number for ${changedPerson.name}`);
+        clearNameAndNumber();
       })
       .catch((error) => {
-        setPersons(
-          persons.filter((p) => (p.name !== changedPerson.name))
-        );
-        feedbackContent(`Error: information for ${name} has already been removed from server`, true);
+        feedbackContent(`${error.response.data.error}`, true);
       });
   };
 
